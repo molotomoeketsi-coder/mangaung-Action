@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ActionSA Mangaung Metro (Wards 1–51) | Master Operations System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+          colors: {
+            asaGreen: '#00874E',
+            asaGreenDark: '#006B3C',
+            asaGreenLight: '#E8F6EF',
+            asaBlack: '#000000',
+            asaCharcoal: '#141414',
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background-color: #F6F8F7;
+      color: #000000;
+      overflow-x: hidden;
+    }
+    .table-scroll::-webkit-scrollbar {
+      height: 8px;
+      width: 8px;
+    }
+    .table-scroll::-webkit-scrollbar-thumb {
+      background: #00874E;
+      border-radius: 9999px;
+    }
+    .table-scroll::-webkit-scrollbar-track {
+      background: #E5E7EB;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <!-- Top Black & Green Brand Banner -->
+  <header class="bg-black text-white border-b-4 border-asaGreen sticky top-0 z-40 shadow-md">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div class="flex flex-wrap items-center justify-between gap-3 py-3">
+        <!-- Brand Identity -->
+        <button
+          type="button"
+          onclick="navigateTo('index')"
+          class="flex items-center gap-3 text-left group focus:outline-none"
+          title="Return to Index & Dashboard"
+        >
+          <div class="bg-asaGreen text-white font-black px-3 py-1.5 rounded-lg text-sm sm:text-base tracking-tight border border-white/20 group-hover:bg-asaGreenDark transition">
+            ActionSA
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="font-extrabold text-sm sm:text-lg tracking-tight text-white">
+                MANGAUNG METRO (WARDS 1–51)
+              </span>
+              <span class="hidden md:inline-block text-[11px] font-bold uppercase tracking-wider bg-white/10 text-emerald-300 px-2 py-0.5 rounded-md border border-emerald-500/30">
+                Master Operations System
+              </span>
+            </div>
+            <p class="text-[11px] sm:text-xs text-gray-300">
+              Tsamaiso ya Dintlha ya Mangaung • Branch, Youth, Women's Committee &amp; Help Desk
+            </p>
+          </div>
+        </button>
+
+        <!-- Quick Action Controls -->
+        <div class="flex items-center gap-2 flex-wrap">
+          <button
+            type="button"
+            onclick="exportCurrentViewCSV()"
+            class="px-3 py-2 rounded-lg text-xs font-bold bg-asaGreen hover:bg-asaGreenDark text-white border border-emerald-400/30 transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <span>⬇ Export CSV</span>
+          </button>
+          <button
+            type="button"
+            onclick="loadSampleData()"
+            class="px-3 py-2 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-white border border-white/20 transition cursor-pointer"
+          >
+            Sample Data
+          </button>
+          <button
+            type="button"
+            onclick="confirmClearAllData()"
+            class="px-3 py-2 rounded-lg text-xs font-semibold bg-black hover:bg-neutral-900 text-red-300 border border-red-500/40 transition cursor-pointer"
+          >
+            Reset All
+          </button>
+        </div>
+      </div>
+
+      <!-- Primary View Navigation Bar -->
+      <nav aria-label="Main Sections" class="flex items-center gap-1.5 overflow-x-auto pb-2.5 pt-1 text-xs sm:text-sm font-bold">
+        <button data-nav="index" onclick="navigateTo('index')" class="nav-pill px-3.5 py-2 rounded-lg whitespace-nowrap transition cursor-pointer">
+          Index &amp; Dashboard
+        </button>
+        <button data-nav="branch" onclick="navigateTo('branch')" class="nav-pill px-3.5 py-2 rounded-lg whitespace-nowrap transition cursor-pointer">
+          Branch Committee
+        </button>
+        <button data-nav="youth" onclick="navigateTo('youth')" class="nav-pill px-3.5 py-2 rounded-lg whitespace-nowrap transition cursor-pointer">
+          Youth League
+        </button>
+        <button data-nav="womens" onclick="navigateTo('womens')" class="nav-pill px-3.5 py-2 rounded-lg whitespace-nowrap transition cursor-pointer">
+          Women's Committee
+        </button>
+        <button data-nav="helpdesk" onclick="navigateTo('helpdesk')" class="nav-pill px-3.5 py-2 rounded-lg whitespace-nowrap transition cursor-pointer">
+          Help Desk (Ke Hloka Thuso)
+        </button>
+        <button data-nav="wards" onclick="navigateTo('wards')" class="nav-pill px-3.5 py-2 rounded-lg whitespace-nowrap transition cursor-pointer">
+          Ward 1–51 Matrix
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Toast / Status Banner (replaces alert/confirm) -->
+  <div id="feedbackBanner" class="max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 mt-3 hidden">
+    <div id="feedbackInner" class="rounded-xl px-4 py-3 text-xs sm:text-sm font-semibold flex items-center justify-between gap-3 border shadow-sm">
+      <span id="feedbackText"></span>
+      <button type="button" onclick="hideFeedback()" class="text-xs font-bold px-2 py-0.5 rounded bg-black/10 hover:bg-black/20 cursor-pointer">✕</button>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal for Destructive Reset -->
+  <div id="confirmModal" class="fixed inset-0 z-50 bg-black/70 hidden items-center justify-center p-4">
+    <div class="bg-white border-2 border-black rounded-2xl max-w-md w-full p-6 shadow-2xl">
+      <div class="flex items-center gap-2 text-black font-black text-base uppercase tracking-wide mb-2">
+        <span class="inline-block w-3 h-3 rounded-full bg-asaGreen"></span>
+        Confirm System Reset / Netefatsa
+      </div>
+      <p class="text-sm text-gray-700 leading-relaxed mb-5">
+        Are you sure you want to clear all saved records across Branch, Youth, Women's Committee, and Help Desk in this browser? This cannot be undone.
+      </p>
+      <div class="flex items-center justify-end gap-3">
+        <button type="button" onclick="closeConfirmModal()" class="px-4 py-2 rounded-lg text-xs font-bold border border-gray-300 text-gray-800 hover:bg-gray-100 cursor-pointer">
+          Cancel / Hlakola
+        </button>
+        <button type="button" onclick="executeClearAllData()" class="px-4 py-2 rounded-lg text-xs font-bold bg-black text-white hover:bg-neutral-800 cursor-pointer">
+          Yes, Clear Records
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Dynamic Application Container -->
+  <main id="appContainer" class="flex-1 max-w-7xl w-full mx-auto px-3 sm:px-6 lg:px-8 py-6 space-y-6"></main>
+
+  <!-- Footer -->
+  <footer class="bg-black text-white border-t-4 border-asaGreen py-4 mt-10">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-300">
+      <div>
+        <strong class="text-white">ActionSA Mangaung Metro (Wards 1–51)</strong> — Master Operations System • Data stored locally in your browser (<code class="text-emerald-400">localStorage</code>)
+      </div>
+      <div class="text-emerald-300 font-semibold">
+        Bloemfontein • Botshabelo • Thaba Nchu • Free State
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    /**
+     * =========================================================================
+     * ACTIONSA MANGAUNG METRO (WARDS 1–51) MASTER OPERATIONS SYSTEM
+     * State Management, SA ID Auto-Parser, Live Aggregations & UI Renderer
+     * =========================================================================
+     */
+
+    const STORAGE_KEY = 'actionsa_mangaung_w1_51_system_v1';
+
+    const WARDS = Array.from({ length: 51 }, (_, idx) => `Ward ${idx + 1}`);
+
+    const REGIONS = [
+      'Bloemfontein',
+      'Botshabelo',
+      'Thaba Nchu',
+      'Other / Rural'
+    ];
+
+    const BRANCH_ROLES = [
+      'Branch Chairperson',
+      'Branch Secretary',
+      'Branch Treasurer',
+      'Branch Organiser',
+      'Street / Section Coordinator',
+      'General Member'
+    ];
+
+    const YOUTH_ROLES = [
+      'Youth Chairperson',
+      'Youth Secretary',
+      'Youth Organiser',
+      'Skills & Education Lead',
+      'Sport & Culture Lead',
+      'Youth Member'
+    ];
+
+    const WOMENS_VOLUNTEER_OPTIONS = [
+      'Help Desk Support',
+      'Cleaning Campaign',
+      'GBV Support',
+      'Digital Skills Training',
+      'Facebook / WhatsApp Comms',
+      'Ithuta Feela Pele'
+    ];
+
+    const WOMENS_ID_STATUSES = [
+      'Eya - ke na le ID',
+      'Tjhe - ha ke na ID',
+      'Ke hloka thuso ka ID'
+    ];
+
+    const WOMENS_FOLLOWUP_STATUSES = [
+      'Pending Call',
+      'Called - Active',
+      'No Answer',
+      'Follow-up Needed'
+    ];
+
+    const MEMBER_STATUSES = ['Active', 'Pending Verification', 'Inactive'];
+    const IEC_STATUSES = ['Registered (IEC)', 'Not Registered', 'Needs Assistance'];
+
+    const HELP_DESK_CATEGORIES = [
+      'Metsi',
+      'Motlakase',
+      'SASSA / Grant',
+      'ID / Birth Certificate',
+      'GBV / Tlhekefetso',
+      'Mosebetsi / CV',
+      'E nngwe'
+    ];
+
+    const CALL_TIMES = [
+      'Hoseng (08:00 - 12:00)',
+      'Motsheare (12:00 - 15:00)',
+      'Thapama (15:00 - 18:00)'
+    ];
+
+    const CASE_STATUSES = [
+      'New / Pending',
+      'In Progress',
+      'Referred',
+      'Resolved'
+    ];
+
+    // Default region assignment across Wards 1-51 for Mangaung Metro
+    function getDefaultRegionForWard(wardNum) {
+      if (wardNum >= 25 && wardNum <= 41) return 'Botshabelo';
+      if (wardNum >= 42 && wardNum <= 46) return 'Thaba Nchu';
+      if (wardNum >= 47 && wardNum <= 51) return 'Other / Rural';
+      return 'Bloemfontein';
+    }
+
+    function createDefaultWardMetadata() {
+      const meta = {};
+      for (let w = 1; w <= 51; w++) {
+        meta[`Ward ${w}`] = {
+          region: getDefaultRegionForWard(w),
+          coordinator: ''
+        };
+      }
+      return meta;
+    }
+
+    function createSampleState() {
+      return {
+        currentView: 'index',
+        editing: {
+          branchId: null,
+          youthId: null,
+          womensId: null,
+          helpdeskId: null
+        },
+        filters: {
+          branchSearch: '',
+          branchWard: 'ALL',
+          branchStatus: 'ALL',
+          youthSearch: '',
+          youthWard: 'ALL',
+          youthStatus: 'ALL',
+          womensSearch: '',
+          womensWard: 'ALL',
+          womensFollowup: 'ALL',
+          helpdeskSearch: '',
+          helpdeskWard: 'ALL',
+          helpdeskCategory: 'ALL',
+          helpdeskStatus: 'ALL',
+          wardMatrixSearch: '',
+          wardMatrixRegion: 'ALL'
+        },
+        wardMeta: createDefaultWardMetadata(),
+        branch: [
+          {
+            id: 'BR-101',
+            fullName: 'Thabo Mokhele',
+            saId: '8804125124083',
+            phone: '073 412 8890',
+            ward: 'Ward 28',
+            region: 'Botshabelo',
+            address: 'Section K, House 142',
+            role: 'Branch Chairperson',
+            iecStatus: 'Registered (IEC)',
+            status: 'Active'
+          },
+          {
+            id: 'BR-102',
+            fullName: 'Naledi Mokoena',
+            saId: '9209180482081',
+            phone: '082 554 1192',
+            ward: 'Ward 18',
+            region: 'Bloemfontein',
+            address: 'Phase 4, Mangaung',
+            role: 'Branch Secretary',
+            iecStatus: 'Registered (IEC)',
+            status: 'Active'
+          }
+        ],
+        youth: [
+          {
+            id: 'YT-201',
+            fullName: 'Katleho Radebe',
+            saId: '0106225311085',
+            phone: '061 804 3321',
+            ward: 'Ward 28',
+            region: 'Botshabelo',
+            address: 'Section H, Street 4',
+            role: 'Youth Chairperson',
+            iecStatus: 'Registered (IEC)',
+            status: 'Active'
+          },
+          {
+            id: 'YT-202',
+            fullName: 'Palesa Tsotetsi',
+            saId: '0311050618082',
+            phone: '078 902 6645',
+            ward: 'Ward 43',
+            region: 'Thaba Nchu',
+            address: 'Selosesha Unit 2',
+            role: 'Skills & Education Lead',
+            iecStatus: 'Needs Assistance',
+            status: 'Pending Verification'
+          }
+        ],
+        womens: [
+          {
+            id: 'WM-301',
+            fullName: 'Mpho Moloi',
+            saId: '8503140712084',
+            phone: '060 315 3439',
+            ward: 'Ward 28',
+            region: 'Botshabelo',
+            address: 'Section K, near Clinic',
+            volunteerAreas: ['Help Desk Support', 'GBV Support', 'Digital Skills Training'],
+            idStatus: 'Eya - ke na le ID',
+            followupStatus: 'Called - Active'
+          },
+          {
+            id: 'WM-302',
+            fullName: 'Dimakatso Sebeko',
+            saId: '9407290521087',
+            phone: '083 719 2048',
+            ward: 'Ward 12',
+            region: 'Bloemfontein',
+            address: 'Bochabela Main Rd',
+            volunteerAreas: ['Cleaning Campaign', 'Facebook / WhatsApp Comms'],
+            idStatus: 'Ke hloka thuso ka ID',
+            followupStatus: 'Pending Call'
+          }
+        ],
+        helpdesk: [
+          {
+            id: 'HD-401',
+            caseNumber: 'MAN-0001',
+            dateLogged: '2026-11-20',
+            ward: 'Ward 28',
+            region: 'Botshabelo',
+            fullName: 'Selloane Mohapi',
+            category: 'Metsi',
+            phone: '072 641 9082',
+            address: 'Section K',
+            description: 'Ha re na metsi Section K matsatsi a 3; water tanker ha e fihle.',
+            callTime: 'Hoseng (08:00 - 12:00)',
+            status: 'In Progress',
+            assignedTo: 'Thabo Mokhele',
+            notes: 'Escalated to Mangaung Water Directorate.'
+          },
+          {
+            id: 'HD-402',
+            caseNumber: 'MAN-0002',
+            dateLogged: '2026-11-21',
+            ward: 'Ward 28',
+            region: 'Botshabelo',
+            fullName: 'Kelebogile Tladi',
+            category: 'SASSA / Grant',
+            phone: '064 221 7730',
+            address: 'Section M',
+            description: 'Child Support Grant payment delayed for two months.',
+            callTime: 'Motsheare (12:00 - 15:00)',
+            status: 'New / Pending',
+            assignedTo: 'Mpho Moloi',
+            notes: 'Awaiting morning call.'
+          },
+          {
+            id: 'HD-403',
+            caseNumber: 'MAN-0003',
+            dateLogged: '2026-11-22',
+            ward: 'Ward 43',
+            region: 'Thaba Nchu',
+            fullName: 'Boitumelo Nhlapo',
+            category: 'Motlakase',
+            phone: '079 510 4412',
+            address: 'Ratlou Village',
+            description: 'Prepaid meter token rejected after transformer maintenance.',
+            callTime: 'Thapama (15:00 - 18:00)',
+            status: 'Resolved',
+            assignedTo: 'Palesa Tsotetsi',
+            notes: 'Meter reset and token issued.'
+          }
+        ]
+      };
+    }
+
+    function createEmptyState() {
+      const sample = createSampleState();
+      return {
+        ...sample,
+        branch: [],
+        youth: [],
+        womens: [],
+        helpdesk: []
+      };
+    }
+
+    let appState = loadState();
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return createSampleState();
+        const parsed = JSON.parse(raw);
+        const fallback = createSampleState();
+        return {
+          ...fallback,
+          ...parsed,
+          editing: { ...fallback.editing, ...(parsed.editing || {}) },
+          filters: { ...fallback.filters, ...(parsed.filters || {}) },
+          wardMeta: { ...createDefaultWardMetadata(), ...(parsed.wardMeta || {}) },
+          branch: Array.isArray(parsed.branch) ? parsed.branch : [],
+          youth: Array.isArray(parsed.youth) ? parsed.youth : [],
+          womens: Array.isArray(parsed.womens) ? parsed.womens : [],
+          helpdesk: Array.isArray(parsed.helpdesk) ? parsed.helpdesk : []
+        };
+      } catch (err) {
+        console.error('Failed to load state from localStorage:', err);
+        return createSampleState();
+      }
+    }
+
+    function saveState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+      } catch (err) {
+        console.error('Failed to save state to localStorage:', err);
+        showFeedback('Could not save to browser storage. Check storage quota.', 'error');
+      }
+    }
+
+    /**
+     * =========================================================================
+     * SOUTH AFRICAN 13-DIGIT ID AUTO-PARSER
+     * Computes Date of Birth (YYYY-MM-DD), Age in Years, and Gender
+     * =========================================================================
+     */
+    function parseSouthAfricanID(rawId) {
+      const clean = String(rawId || '').replace(/\D/g, '');
+      if (clean.length !== 13) {
+        return {
+          valid: false,
+          dob: '—',
+          age: '—',
+          gender: '—',
+          reason: clean.length === 0 ? 'Enter 13-digit SA ID' : `${clean.length}/13 digits`
+        };
+      }
+
+      const yy = parseInt(clean.slice(0, 2), 10);
+      const mm = parseInt(clean.slice(2, 4), 10);
+      const dd = parseInt(clean.slice(4, 6), 10);
+      const genderDigits = parseInt(clean.slice(6, 10), 10);
+
+      // Determine century relative to current year (2026)
+      const currentFullYear = new Date().getFullYear();
+      const currentTwoDigit = currentFullYear % 100;
+      const fullYear = yy <= currentTwoDigit + 1 ? 2000 + yy : 1900 + yy;
+
+      const testDate = new Date(fullYear, mm - 1, dd);
+      const isDateValid =
+        mm >= 1 &&
+        mm <= 12 &&
+        dd >= 1 &&
+        dd <= 31 &&
+        testDate.getFullYear() === fullYear &&
+        testDate.getMonth() === mm - 1 &&
+        testDate.getDate() === dd;
+
+      if (!isDateValid) {
+        return {
+          valid: false,
+          dob: 'Invalid Date',
+          age: '—',
+          gender: '—',
+          reason: 'Invalid birth date in ID'
+        };
+      }
+
+      const today = new Date();
+      let age = today.getFullYear() - fullYear;
+      const monthDiff = today.getMonth() - (mm - 1);
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dd)) {
+        age -= 1;
+      }
+
+      const gender = genderDigits >= 5000 ? 'Male' : 'Female';
+      const dobStr = `${fullYear}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
+
+      return {
+        valid: true,
+        dob: dobStr,
+        age: age >= 0 ? age : 0,
+        gender,
+        reason: 'Valid SA ID'
+      };
+    }
+
+    /**
+     * Generates next sequential case number like MAN-0001, MAN-0002...
+     */
+    function getNextCaseNumber() {
+      let maxNum = 0;
+      for (const item of appState.helpdesk) {
+        const match = String(item.caseNumber || '').match(/(\d+)$/);
+        if (match) {
+          const val = parseInt(match[1], 10);
+          if (val > maxNum) maxNum = val;
+        }
+      }
+      return `MAN-${String(maxNum + 1).padStart(4, '0')}`;
+    }
+
+    /**
+     * =========================================================================
+     * LIVE AGGREGATIONS & WARD 1–51 MATRIX CALCULATIONS
+     * =========================================================================
+     */
+    function computeSystemMetrics() {
+      const branchFemale = 
